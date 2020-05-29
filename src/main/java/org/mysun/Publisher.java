@@ -32,7 +32,7 @@ public class Publisher implements Runnable
             while (!publication.isConnected() && isRunning.get())
             {
                 idleStrategy.idle();
-                System.out.println("Not connected...");
+//                System.out.println("Not connected...");
             }
 
 

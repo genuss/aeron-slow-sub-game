@@ -6,8 +6,8 @@ import io.aeron.logbuffer.FragmentHandler;
 import org.agrona.collections.MutableLong;
 import org.agrona.concurrent.SigInt;
 import org.agrona.concurrent.SleepingMillisIdleStrategy;
-import org.agrona.console.ContinueBarrier;
 
+import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -17,14 +17,15 @@ public class Subscriber implements Runnable
     private final AtomicBoolean isRunning;
     private final Settings.Speed mySpeed;
 
-    public Subscriber(Settings settings, Subscription subscription, AtomicBoolean isRunning)
+    public Subscriber(Subscription subscription, Settings.Speed mySpeed, AtomicBoolean isRunning)
     {
         this.subscription = subscription;
+        this.mySpeed = mySpeed;
         this.isRunning = isRunning;
 
-        mySpeed = settings.getSubscribersSpeed().get(settings.getCurrentNumber());
-        System.out.println("I'm " + mySpeed + " subscriber #" + settings.getCurrentNumber());
     }
+
+
 
     @Override
     public void run()
@@ -59,6 +60,8 @@ public class Subscriber implements Runnable
             System.exit(1);
         }
         settings.save();
+        Settings.Speed mySpeed = settings.getSubscribersSpeed().get(settings.getCurrentNumber());
+        System.out.println("I'm " + mySpeed + " subscriber #" + settings.getCurrentNumber());
 
         final AtomicBoolean isRunning = new AtomicBoolean(true);
         SigInt.register(() -> isRunning.set(false));
@@ -69,13 +72,25 @@ public class Subscriber implements Runnable
             final Subscription subscription = aeron.addSubscription(settings.getChannel(), settings.getStreamId());)
         {
             final CompletableFuture<Void> subscriberTask = CompletableFuture.runAsync(
-                new Subscriber(settings, subscription, isRunning)
+                new Subscriber(subscription, mySpeed, isRunning)
             );
 
             System.out.println("Connected!");
 
-            ContinueBarrier barrier = new ContinueBarrier("exit?");
-            barrier.await();
+            System.out.format("Am I the slow subscriber? (y/n)").flush();
+            Scanner in = new Scanner(System.in);
+            String line = in.nextLine();
+            final boolean answer = "y".equalsIgnoreCase(line);
+            if (answer == (mySpeed == Settings.Speed.SLOW))
+            {
+                System.out.println("You won!");
+            } else
+            {
+                System.out.println("Nooooo!!!");
+                System.out.println("My number is " + currentNumber);
+                System.out.println("The actual list of subscribers is " + settings.getSubscribersSpeed());
+
+            }
             isRunning.set(false);
             subscriberTask.get();
         }
