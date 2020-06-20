@@ -68,7 +68,7 @@ public class Subscriber implements Runnable
 
         System.out.println("Connect to the Aeron...");
         try (
-            final Aeron aeron = Aeron.connect(new Aeron.Context().aeronDirectoryName(Settings.AERON_DIRECTORY_NAME));
+            final Aeron aeron = Aeron.connect(new Aeron.Context());
             final Subscription subscription = aeron.addSubscription(settings.getChannel(), settings.getStreamId());)
         {
             final CompletableFuture<Void> subscriberTask = CompletableFuture.runAsync(

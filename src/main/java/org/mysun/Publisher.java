@@ -65,7 +65,7 @@ public class Publisher implements Runnable
                     .aeronDirectoryName(AERON_DIRECTORY_NAME)
                     .dirDeleteOnShutdown(true)
                     .dirDeleteOnStart(true));
-            final Aeron aeron = Aeron.connect(new Aeron.Context().aeronDirectoryName(AERON_DIRECTORY_NAME));
+            final Aeron aeron = Aeron.connect(new Aeron.Context());
             final Publication publication = aeron.addPublication(settings.getChannel(), settings.getStreamId());)
         {
             settings.save();
