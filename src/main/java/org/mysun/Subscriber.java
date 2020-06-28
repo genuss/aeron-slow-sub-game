@@ -1,5 +1,7 @@
 package org.mysun;
 
+import static org.mysun.Settings.AERON_DIRECTORY_NAME;
+
 import io.aeron.Aeron;
 import io.aeron.Subscription;
 import io.aeron.logbuffer.FragmentHandler;
@@ -68,7 +70,7 @@ public class Subscriber implements Runnable
 
         System.out.println("Connect to the Aeron...");
         try (
-            final Aeron aeron = Aeron.connect(new Aeron.Context());
+            final Aeron aeron = Aeron.connect(new Aeron.Context().aeronDirectoryName(AERON_DIRECTORY_NAME));
             final Subscription subscription = aeron.addSubscription(settings.getChannel(), settings.getStreamId());)
         {
             final CompletableFuture<Void> subscriberTask = CompletableFuture.runAsync(
